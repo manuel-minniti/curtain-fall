@@ -1,5 +1,7 @@
 # Curtain Fall
 
+![Curtain Fall extension icon](icons/icon-128.png)
+
 **Curtain Fall** is a Chrome extension that removes annoying pop-ups and cookie banners.
 
 ## Features
