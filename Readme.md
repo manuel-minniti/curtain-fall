@@ -31,4 +31,4 @@ Use this extension responsibly. Be aware of the legal and ethical considerations
 
 ## Contact
 
-For questions or suggestions, please contact [Manuel Minniti](hi@manuelminniti.de).
+For questions or suggestions, please contact Manuel Minniti (hi@manuelminniti.de).
