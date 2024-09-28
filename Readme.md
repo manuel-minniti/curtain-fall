@@ -23,7 +23,7 @@ Contributions are welcome! Please open an issue or submit a pull request.
 
 ## License
 
-This project is licensed under the [MIT License](LICENSE).
+This project is licensed under the [AGPL-3.0](https://www.gnu.org/licenses/agpl-3.0.html) license.
 
 ## Disclaimer
 
