@@ -1,0 +1,24 @@
+# Node modules
+node_modules/
+
+# Logs
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# Build directories
+dist/
+build/
+
+# Mac OS metadata
+.DS_Store
+
+# Idea and VSCode settings
+.idea/
+.vscode/
+
+# Compiled files
+*.log
+
+# Other
+TODO.md
