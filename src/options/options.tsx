@@ -17,6 +17,8 @@ import { Label } from "@/components/ui/label"
 import { TooltipProvider } from "@/components/ui/tooltip"
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs"
 
+import RemovalPopup from "../popupEdit/popupEdit"
+
 import {
     Cross1Icon,
     CrossCircledIcon,
@@ -27,6 +29,7 @@ import Tooltip from "../components/Tooltip"
 
 import { RemovalsManager } from "../config"
 import type { ModalRemoval } from "../config"
+import EditRemovalForm from "../components/EditRemovalForm"
 
 type RemovalActions = {
     edit?: (id: string) => void
@@ -230,7 +233,6 @@ function Options() {
     const [editingRemoval, setEditingRemoval] = useState<ModalRemoval | null>(
         null
     )
-    const [editingId, setEditingId] = useState<string | null>(null)
     const [isDialogOpen, setIsDialogOpen] = useState<boolean>(false)
 
     useEffect(() => {
@@ -279,18 +281,24 @@ function Options() {
         const index = RemovalsManager.findIndexById(removals, id)
         const removal = removals[index]
         setEditingRemoval(removal)
-        setEditingId(id)
         setIsDialogOpen(true)
     }
 
-    const saveRemoval = async () => {
-        if (editingRemoval && editingId !== null) {
-            await RemovalsManager.updateRemoval(editingId, editingRemoval)
-            await loadRemovals()
-            setMessage("Removal updated successfully.")
-            setIsDialogOpen(false)
-        }
+    const saveRemoval = async (updatedRemoval) => {
+        await RemovalsManager.updateRemoval(updatedRemoval.id, updatedRemoval)
+        await loadRemovals()
+        setMessage("Removal updated successfully.")
+        setIsDialogOpen(false)
+        loadRemovals()
     }
+
+    // Set a timer after setting a message to clear it after X seconds.
+    useEffect(() => {
+        if (message) {
+            const timer = setTimeout(() => setMessage(null), 3000)
+            return () => clearTimeout(timer)
+        }
+    }, [message])
 
     return (
         <TooltipProvider delayDuration={0}>
@@ -369,75 +377,12 @@ function Options() {
                     )}
 
                     {/* Edit Removal Dialog */}
-                    {isDialogOpen && (
-                        <div className="p-2">
-                            <div className="space-y-4">
-                                <Button
-                                    variant="secondary"
-                                    onClick={() => setIsDialogOpen(false)}
-                                >
-                                    Close
-                                </Button>
-                                {editingRemoval && (
-                                    <div className="space-y-4">
-                                        <div>
-                                            <Label
-                                                className="mb-2"
-                                                htmlFor="removal-name"
-                                            >
-                                                Name
-                                            </Label>
-                                            <Input
-                                                id="removal-name"
-                                                value={editingRemoval.name}
-                                                onChange={(e) =>
-                                                    setEditingRemoval({
-                                                        ...editingRemoval,
-                                                        name: e.target.value
-                                                    })
-                                                }
-                                            />
-                                        </div>
-                                        <div>
-                                            <Label
-                                                className="mb-2"
-                                                htmlFor="removal-description"
-                                            >
-                                                Description
-                                            </Label>
-                                            <Textarea
-                                                id="removal-description"
-                                                value={
-                                                    editingRemoval.description
-                                                }
-                                                onChange={(e) =>
-                                                    setEditingRemoval({
-                                                        ...editingRemoval,
-                                                        description:
-                                                            e.target.value
-                                                    })
-                                                }
-                                            />
-                                        </div>
-                                        <div className="flex gap-2">
-                                            <Button onClick={saveRemoval}>
-                                                Save
-                                            </Button>
-                                            <Button
-                                                variant="destructive"
-                                                onClick={() => {
-                                                    if (editingId !== null) {
-                                                        deleteRemoval(editingId)
-                                                    }
-                                                }}
-                                            >
-                                                Delete
-                                            </Button>
-                                        </div>
-                                    </div>
-                                )}
-                            </div>
-                        </div>
+                    {isDialogOpen && editingRemoval && (
+                        <EditRemovalForm
+                            initialRemoval={editingRemoval}
+                            onSave={saveRemoval}
+                            onCancel={() => setIsDialogOpen(false)}
+                        />
                     )}
                 </div>
             </div>

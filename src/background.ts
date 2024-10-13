@@ -102,6 +102,12 @@ chrome.contextMenus.onClicked.addListener((info, tab) => {
 })
 
 // Listeners
+chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
+    if (request.action === "openEditPopup") {
+        openEditPopup(request.id)
+    }
+})
+
 chrome.runtime.onMessage.addListener(async (request, sender, sendResponse) => {
     if (request.action === "elementSelected") {
         const { selector, screenshot } = request.data

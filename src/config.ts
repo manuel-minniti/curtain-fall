@@ -16,7 +16,7 @@ type EnabledDefaultRemoval = Record<string, { enabled: boolean }>
 
 export const defaultRemovals: ModalRemoval[] = [
     {
-        id: uuid(),
+        id: "remove-paywalls",
         isDefault: true,
         enabled: true,
         name: "Remove payment wall",
@@ -26,7 +26,7 @@ export const defaultRemovals: ModalRemoval[] = [
         styleReset: [{ elementSelector: "body", styles: { overflow: "" } }]
     },
     {
-        id: uuid(),
+        id: "remove-cookie-consent",
         isDefault: true,
         enabled: true,
         name: "Remove Cookie Consent from News websites",
@@ -68,6 +68,8 @@ export class RemovalsManager {
     static async getDefaultRemovals(): Promise<ModalRemoval[]> {
         const enabledDefaultRemovals = await this.getEnabledDefaultRemovals()
 
+        console.log("enabledDefaultRemovals", enabledDefaultRemovals)
+
         this.setDefaultRemovals(
             this.defaultRemovals.map((removal) => {
                 const enabled = enabledDefaultRemovals[removal.id]?.enabled
@@ -77,6 +79,8 @@ export class RemovalsManager {
                 }
             })
         )
+
+        console.log("this.defaultRemovals", this.defaultRemovals)
 
         return this.defaultRemovals
     }
@@ -92,6 +96,8 @@ export class RemovalsManager {
         )
         const enabledDefaultRemovals =
             result[this.enabledDefaultRemovalsKey] || {}
+
+        console.log("getEnabledDefaultRemovals", enabledDefaultRemovals)
 
         return enabledDefaultRemovals
     }
