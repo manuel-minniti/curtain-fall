@@ -15,9 +15,7 @@ function notifyUser(message: string) {
 }
 
 function handleNotificationAction() {
-    // Open the options page
     chrome.runtime.openOptionsPage()
-    // Clear the notification
     chrome.notifications.clear(notificationId)
 }
 
@@ -103,6 +101,7 @@ chrome.contextMenus.onClicked.addListener((info, tab) => {
     }
 })
 
+// Listeners
 chrome.runtime.onMessage.addListener(async (request, sender, sendResponse) => {
     if (request.action === "elementSelected") {
         const { selector, screenshot } = request.data
@@ -133,7 +132,7 @@ chrome.runtime.onMessage.addListener(async (request, sender, sendResponse) => {
 
         // Save the selector and screenshot to storage
         RemovalsManager.addRemoval(newRemoval).then(() => {
-            notifyUser("New removal created successfully.")
+            notifyUser(`New removal '${name}' created successfully.`)
             openEditPopup(newRemoval.id)
         })
     }

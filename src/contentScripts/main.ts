@@ -33,7 +33,7 @@ async function init() {
         subtree: true
     })
 
-    // Listen for changes to the removals
+    // Listen for changes in the local storage.
     chrome.storage.onChanged.addListener((changes, areaName) => {
         if (areaName === "local") {
             if (

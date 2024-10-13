@@ -1,4 +1,17 @@
 const storage = {
+    onChanged: {
+        addListener: (
+            callback: (
+                changes: { [key: string]: chrome.storage.StorageChange },
+                areaName: string
+            ) => void
+        ) => {
+            console.log("Mock storage.onChanged.addListener called")
+
+            // Mock listener
+            callback({}, "local")
+        }
+    },
     local: {
         data: {},
         get: async (
@@ -19,6 +32,17 @@ const storage = {
         set: (items: { [key: string]: any }, callback?: () => void) => {
             storage.local.data = { ...storage.local.data, ...items }
             if (callback) callback()
+
+            // Notify listeners
+            storage.onChanged.addListener((changes, areaName) => {
+                if (areaName === "local") {
+                    Object.keys(items).forEach((key) => {
+                        if (key in changes) {
+                            storage.local.data[key] = changes[key].newValue
+                        }
+                    })
+                }
+            })
         },
         remove: (keys: string | string[], callback?: () => void) => {
             if (typeof keys === "string") {

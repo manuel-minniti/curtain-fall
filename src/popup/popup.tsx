@@ -16,6 +16,7 @@ import { RemovalsManager } from "../config"
 function Popup() {
     const [isSelecting, setIsSelecting] = useState<boolean>(false)
     const [isEnabled, setIsEnabled] = useState<boolean>(true)
+    const [showReload, setShowReload] = useState<boolean>(false)
 
     useEffect(() => {
         RemovalsManager.getExtensionEnabled().then((enabled) => {
@@ -26,6 +27,18 @@ function Popup() {
     const handleToggle = (checked: boolean) => {
         setIsEnabled(checked)
         RemovalsManager.setExtensionEnabled(checked)
+
+        setShowReload(true)
+    }
+
+    const handleReload = async () => {
+        chrome.tabs.query({ active: true, currentWindow: true }, (tabs) => {
+            if (tabs[0]?.id !== undefined) {
+                chrome.tabs.reload(tabs[0].id)
+            }
+        })
+
+        setShowReload(false)
     }
 
     const handleSelectClick = () => {
@@ -107,6 +120,16 @@ function Popup() {
                         {isEnabled ? "Enabled" : "Disabled"}
                     </Label>
                 </div>
+                {showReload && (
+                    <div className="mt-2 p-4 flex flex-col items-center justify-items-center bg-muted border-2 rounded">
+                        <div className="text-xs text-muted-foreground mb-2">
+                            Reload the tab to apply changes.
+                        </div>
+                        <Button onClick={handleReload} variant="outline">
+                            Reload Tab
+                        </Button>
+                    </div>
+                )}
             </div>
             <Separator />
             <div className="p-4">
