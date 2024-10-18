@@ -1,5 +1,6 @@
 {
     "compilerOptions": {
+        "jsx": "react",
         "target": "esnext",
         "module": "esnext",
         "moduleResolution": "node",
@@ -17,5 +18,5 @@
             "@/*": ["./src/*"]
         }
     },
-    "include": ["src/**/*.ts", "src/**/*.d.ts"]
+    "include": ["src"]
 }

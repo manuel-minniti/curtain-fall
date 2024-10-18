@@ -1,5 +1,3 @@
-import { v4 as uuid } from "uuid"
-
 export interface ModalRemoval {
     id: string
     name: string
@@ -68,8 +66,6 @@ export class RemovalsManager {
     static async getDefaultRemovals(): Promise<ModalRemoval[]> {
         const enabledDefaultRemovals = await this.getEnabledDefaultRemovals()
 
-        console.log("enabledDefaultRemovals", enabledDefaultRemovals)
-
         this.setDefaultRemovals(
             this.defaultRemovals.map((removal) => {
                 const enabled = enabledDefaultRemovals[removal.id]?.enabled
@@ -79,8 +75,6 @@ export class RemovalsManager {
                 }
             })
         )
-
-        console.log("this.defaultRemovals", this.defaultRemovals)
 
         return this.defaultRemovals
     }
@@ -96,8 +90,6 @@ export class RemovalsManager {
         )
         const enabledDefaultRemovals =
             result[this.enabledDefaultRemovalsKey] || {}
-
-        console.log("getEnabledDefaultRemovals", enabledDefaultRemovals)
 
         return enabledDefaultRemovals
     }

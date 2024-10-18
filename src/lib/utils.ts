@@ -2,6 +2,8 @@ import { clsx, type ClassValue } from "clsx"
 import { twMerge } from "tailwind-merge"
 import { createRoot } from "react-dom/client"
 
+import { EXTENSION_ID, EXTENSION_SHADOW_ROOT_ID } from "@/constants"
+
 export function cn(...inputs: ClassValue[]) {
     return twMerge(clsx(inputs))
 }
@@ -14,6 +16,7 @@ export function cn(...inputs: ClassValue[]) {
 export function createShadowRoot(styles: string) {
     // Create a container element to hold the shadow root
     const container = document.createElement("div")
+    container.id = EXTENSION_SHADOW_ROOT_ID
 
     // Attach a shadow root to the container element
     const shadow = container.attachShadow({ mode: "open" })
@@ -33,4 +36,10 @@ export function createShadowRoot(styles: string) {
 
     // Return a React root created inside the shadow root
     return createRoot(shadow)
+}
+
+export function getExtensionRoot() {
+    return document
+        .getElementById(EXTENSION_SHADOW_ROOT_ID)
+        ?.shadowRoot?.getElementById(EXTENSION_ID)
 }

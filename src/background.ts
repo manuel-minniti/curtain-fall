@@ -3,13 +3,20 @@ import { v4 as uuid } from "uuid"
 
 import iconDataUrl from "./assets/icons/icon-48.png"
 
+import {
+    ACTION_ELEMENT_SELETED,
+    ACTION_OPEN_EDIT_POPUP,
+    ACTION_OPEN_OPTIONS,
+    EXTENSION_NAME
+} from "./constants"
+
 const notificationId = "curtainFallNotification"
 
 function notifyUser(message: string) {
     chrome.notifications.create(notificationId, {
         type: "basic",
         iconUrl: iconDataUrl,
-        title: "Curtain Fall",
+        title: EXTENSION_NAME,
         message
     })
 }
@@ -83,14 +90,14 @@ chrome.notifications.onClicked.addListener((notificationId) => {
 
 chrome.runtime.onInstalled.addListener(() => {
     chrome.contextMenus.create({
-        id: "open-options",
-        title: "Open Curtain Fall Options",
+        id: ACTION_OPEN_OPTIONS,
+        title: `Open ${EXTENSION_NAME} Options`,
         contexts: ["action"]
     })
 })
 
 chrome.contextMenus.onClicked.addListener((info, tab) => {
-    if (info.menuItemId === "open-options") {
+    if (info.menuItemId === ACTION_OPEN_OPTIONS) {
         if (chrome.runtime.openOptionsPage) {
             chrome.runtime.openOptionsPage()
         } else if (tab) {
@@ -103,13 +110,14 @@ chrome.contextMenus.onClicked.addListener((info, tab) => {
 
 // Listeners
 chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
-    if (request.action === "openEditPopup") {
+    if (request.action === ACTION_OPEN_EDIT_POPUP) {
         openEditPopup(request.id)
+        sendResponse({ status: "Opened" })
     }
 })
 
 chrome.runtime.onMessage.addListener(async (request, sender, sendResponse) => {
-    if (request.action === "elementSelected") {
+    if (request.action === ACTION_ELEMENT_SELETED) {
         const { selector, screenshot } = request.data
 
         // Current date in short format
@@ -141,5 +149,7 @@ chrome.runtime.onMessage.addListener(async (request, sender, sendResponse) => {
             notifyUser(`New removal '${name}' created successfully.`)
             openEditPopup(newRemoval.id)
         })
+
+        sendResponse({ status: "Element selected" })
     }
 })

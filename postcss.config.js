@@ -14,12 +14,9 @@ function transformSelector(prefix, selector, prefixedSelector) {
     if ([":root", ":host", "html", "body"].includes(selector)) {
         return ":host"
     }
-    if (
-        ["[data-theme]", "[data-theme=light]", "[data-theme=dark]"].includes(
-            selector
-        )
-    ) {
-        return `:host ${selector}`
+    if (selector.includes(".dark")) {
+        // Ensure :host(.dark) is not altered
+        return selector
     }
     return prefixedSelector
 }
@@ -36,7 +33,7 @@ const postcssConfig = {
 
         // Add a prefix to all selectors
         postcssPrefixSelector({
-            prefix: "#curtain-fall",
+            prefix: `#curtain-fall`,
             transform: transformSelector
         }),
 

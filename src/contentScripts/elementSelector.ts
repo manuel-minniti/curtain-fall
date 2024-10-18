@@ -1,3 +1,8 @@
+import {
+    ACTION_ELEMENT_SELETED,
+    ACTION_START_SELECTING,
+    ACTION_STOP_SELECTING
+} from "@/constants"
 import html2canvas from "html2canvas-pro"
 
 if (__DEV__) {
@@ -11,11 +16,11 @@ let isSelecting = false
 let highlightDiv: HTMLElement | null = null
 
 chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
-    if (request.action === "startSelecting") {
+    if (request.action === ACTION_START_SELECTING) {
         isSelecting = true
         bindListeners()
         sendResponse({ status: "selection started" })
-    } else if (request.action === "stopSelecting") {
+    } else if (request.action === ACTION_STOP_SELECTING) {
         isSelecting = false
         cleanUp()
         sendResponse({ status: "selection stopped" })
@@ -134,7 +139,7 @@ function selectElement(event: MouseEvent) {
     }).then((canvas) => {
         const imageData = canvas.toDataURL()
         chrome.runtime.sendMessage({
-            action: "elementSelected",
+            action: ACTION_ELEMENT_SELETED,
             data: {
                 selector,
                 screenshot: imageData

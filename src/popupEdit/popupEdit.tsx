@@ -5,6 +5,7 @@ import { Progress } from "@/components/ui/progress"
 import { ModalRemoval, RemovalsManager, defaultRemovals } from "../config"
 
 import EditRemovalForm from "../components/EditRemovalForm"
+import { EXTENSION_ID } from "@/constants"
 
 const MAX_LOADING_TIME = 2000
 
@@ -43,7 +44,7 @@ function RemovalPopup() {
     }, [])
 
     return (
-        <div id="curtain-fall">
+        <div id={EXTENSION_ID}>
             <div className="p-4">
                 {progress < 100 && !removal && <Progress value={progress} />}
                 {progress >= 100 && !removal && (

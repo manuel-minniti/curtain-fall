@@ -12,6 +12,13 @@ import { Separator } from "@/components/ui/separator"
 
 import ExtensionIcon from "@/assets/icons/icon-48.png"
 import { RemovalsManager } from "../config"
+import {
+    ACTION_START_SELECTING,
+    ACTION_STOP_SELECTING,
+    EXTENSION_NAME
+} from "@/constants"
+
+import { ThemeSwitcher } from "@/components/ThemeSwitcher"
 
 function Popup() {
     const [isSelecting, setIsSelecting] = useState<boolean>(false)
@@ -48,9 +55,9 @@ function Popup() {
                     chrome.tabs.sendMessage(
                         tabs[0].id,
                         {
-                            action: "startSelecting"
+                            action: ACTION_START_SELECTING
                         },
-                        (response) => {
+                        () => {
                             if (chrome.runtime.lastError) {
                                 console.error(chrome.runtime.lastError)
                                 setIsSelecting(false)
@@ -63,9 +70,9 @@ function Popup() {
                     chrome.tabs.sendMessage(
                         tabs[0].id,
                         {
-                            action: "stopSelecting"
+                            action: ACTION_STOP_SELECTING
                         },
-                        (response) => {
+                        () => {
                             if (chrome.runtime.lastError) {
                                 console.error(chrome.runtime.lastError)
                                 setIsSelecting(true)
@@ -94,17 +101,18 @@ function Popup() {
     const selectButtonIconClass = "w-4 h-4 mr-2"
 
     return (
-        <div id="curtain-fall">
+        <>
             <div className="p-4">
-                <span className="flex items-center gap-2 mb-2">
+                <span className="flex items-center justify-between gap-2 mb-2">
                     <img
                         src={ExtensionIcon}
-                        alt="Curtain Fall"
+                        alt={EXTENSION_NAME}
                         className="w-8 h-8"
                     />
-                    <span className="text-lg font-bold block">
-                        Curtain Fall
+                    <span className="text-lg font-bold block flex-1">
+                        {EXTENSION_NAME}
                     </span>
+                    <ThemeSwitcher />
                 </span>
                 <p className="text-sm text-muted-foreground mb-4">
                     ... is a Chrome extension that removes annoying pop-ups and
@@ -170,7 +178,7 @@ function Popup() {
                     </a>
                 </Button>
             </div>
-        </div>
+        </>
     )
 }
 

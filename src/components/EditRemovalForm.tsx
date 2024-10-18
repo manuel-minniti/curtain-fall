@@ -4,7 +4,7 @@ import { ModalRemoval } from "../config"
 
 import { Input } from "@/components/ui/input"
 import { Textarea } from "@/components/ui/textarea"
-import { Button } from "@/components/ui/button"
+import { Button, ButtonProps } from "@/components/ui/button"
 import {
     Collapsible,
     CollapsibleContent,
@@ -13,13 +13,15 @@ import {
 
 import { ChevronDownIcon } from "@radix-ui/react-icons"
 
+import { getErrorMessage, reportError } from "@/lib/error"
+
 interface EditRemovalFormProps {
     initialRemoval: ModalRemoval
     onSave: (removal: ModalRemoval) => void
     onCancel?: () => void
 }
 
-const SmallButton = (props: any) => (
+const SmallButton = (props: ButtonProps) => (
     <Button size="sm" {...props}>
         {props.children}
     </Button>
@@ -250,7 +252,9 @@ function EditRemovalForm({
                                                 }
                                             )
                                         } catch (error) {
-                                            // Handle JSON parse error if needed
+                                            reportError({
+                                                message: getErrorMessage(error)
+                                            })
                                         }
                                     }}
                                 />
