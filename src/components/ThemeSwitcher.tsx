@@ -1,45 +1,51 @@
-import React from "react"
-import { Moon, Sun } from "lucide-react"
-
-import { Button } from "@/components/ui/button"
+import React, { useEffect } from "react"
 import {
-    DropdownMenu,
-    DropdownMenuContent,
-    DropdownMenuItem,
-    DropdownMenuTrigger,
-    DropdownMenuPortal
-} from "@/components/ui/dropdown-menu"
-import { useTheme } from "@/components/ThemeProvider"
+    Select,
+    SelectContent,
+    SelectItem,
+    SelectTrigger,
+    SelectValue
+} from "@/components/ui/select"
+import { Theme, useTheme } from "@/components/ThemeProvider"
+import { getExtensionRoot } from "@/lib/utils"
 
 export function ThemeSwitcher() {
-    const { setTheme } = useTheme()
-    const ref = React.useRef<HTMLDivElement>(null)
+    const [extensionRoot, setExtensionRoot] =
+        React.useState<HTMLElement | null>(null)
+    const { setTheme, theme } = useTheme()
+
+    const handleValueChange = (value: Theme) => {
+        setTheme(value)
+    }
+
+    useEffect(() => {
+        const timer = setInterval(() => {
+            const root = getExtensionRoot()
+            if (root) {
+                setExtensionRoot(root)
+            }
+        }, 50)
+
+        return () => {
+            clearInterval(timer)
+        }
+    }, [])
+
+    if (!extensionRoot) {
+        return null
+    }
 
     return (
-        <DropdownMenu modal={false}>
-            <DropdownMenuTrigger asChild>
-                <Button variant="outline" size="icon">
-                    <Sun className="h-[1.2rem] w-[1.2rem] rotate-0 scale-100 transition-all dark:-rotate-90 dark:scale-0" />
-                    <Moon className="absolute h-[1.2rem] w-[1.2rem] rotate-90 scale-0 transition-all dark:rotate-0 dark:scale-100" />
-                    <span className="sr-only">Toggle theme</span>
-                </Button>
-            </DropdownMenuTrigger>
+        <Select value={theme} onValueChange={handleValueChange}>
+            <SelectTrigger className="w-[120px]">
+                <SelectValue placeholder="Theme" />
+            </SelectTrigger>
 
-            <div ref={ref}>
-                <DropdownMenuPortal container={ref.current}>
-                    <DropdownMenuContent align="end">
-                        <DropdownMenuItem onClick={() => setTheme("light")}>
-                            Light
-                        </DropdownMenuItem>
-                        <DropdownMenuItem onClick={() => setTheme("dark")}>
-                            Dark
-                        </DropdownMenuItem>
-                        <DropdownMenuItem onClick={() => setTheme("system")}>
-                            System
-                        </DropdownMenuItem>
-                    </DropdownMenuContent>
-                </DropdownMenuPortal>
-            </div>
-        </DropdownMenu>
+            <SelectContent align="end">
+                <SelectItem value="light">Light</SelectItem>
+                <SelectItem value="dark">Dark</SelectItem>
+                <SelectItem value="system">System</SelectItem>
+            </SelectContent>
+        </Select>
     )
 }

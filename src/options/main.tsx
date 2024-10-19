@@ -1,13 +1,13 @@
 import React from "react"
 import App from "./options"
 import createAppRoot from "@/lib/createRootApp"
-import { ThemeProvider } from "@/components/ThemeProvider"
+import Layout from "@/components/Layout"
 
 const root = createAppRoot()
 root.render(
-    <ThemeProvider>
+    <Layout>
         <App />
-    </ThemeProvider>
+    </Layout>
 )
 
 export default root

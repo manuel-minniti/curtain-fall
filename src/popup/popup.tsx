@@ -101,7 +101,7 @@ function Popup() {
     const selectButtonIconClass = "w-4 h-4 mr-2"
 
     return (
-        <>
+        <div className="w-[354px]">
             <div className="p-4">
                 <span className="flex items-center justify-between gap-2 mb-2">
                     <img
@@ -129,12 +129,15 @@ function Popup() {
                     </Label>
                 </div>
                 {showReload && (
-                    <div className="mt-2 p-4 flex flex-col items-center justify-items-center bg-muted border-2 rounded">
+                    <div className="mt-2 p-4 flex flex-col items-center justify-items-center bg-muted border-2 border-primary rounded">
+                        <div className="text-sm text-foreground mb-2">
+                            Reload required
+                        </div>
                         <div className="text-xs text-muted-foreground mb-2">
                             Reload the tab to apply changes.
                         </div>
                         <Button onClick={handleReload} variant="outline">
-                            Reload Tab
+                            Reload
                         </Button>
                     </div>
                 )}
@@ -157,9 +160,11 @@ function Popup() {
                         )}
                         {selectButtonLabel}
                     </Button>
-                    <Button onClick={openOptions} variant="outline">
-                        Options
-                    </Button>
+                    {!isSelecting && (
+                        <Button onClick={openOptions} variant="outline">
+                            Options
+                        </Button>
+                    )}
                 </div>
             </div>
             <Separator />
@@ -178,7 +183,7 @@ function Popup() {
                     </a>
                 </Button>
             </div>
-        </>
+        </div>
     )
 }
 

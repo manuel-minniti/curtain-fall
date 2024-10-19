@@ -1,9 +1,7 @@
 import React, { useState, useEffect } from "react"
 
 import { Button } from "@/components/ui/button"
-import { TooltipProvider } from "@/components/ui/tooltip"
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs"
-import { Toaster } from "@/components/ui/toaster"
 
 import RemovalItem from "./RemovalItem"
 
@@ -13,7 +11,6 @@ import EditRemovalForm from "../components/EditRemovalForm"
 
 import type { RemovalActions } from "../types"
 import { useToast } from "@/hooks/use-toast"
-import { EXTENSION_ID } from "@/constants"
 
 const EmptyRemovalList = () => {
     return (
@@ -122,82 +119,75 @@ function Options() {
     }
 
     return (
-        <TooltipProvider delayDuration={0}>
-            <div id={EXTENSION_ID} style={{ width: 600 }}>
-                <Toaster />
-
-                <div className="p-4 pt-0 min-h-[440px]">
-                    {__DEV__ && (
-                        <div className="p-4 mb-2 bg-amber-100 text-amber-800 rounded space-y-2">
-                            <div className="font-bold">Development Mode</div>
-                            <div className="text-sm">
-                                You are currently in development mode. This mode
-                                allows you to test the extension without
-                                affecting the browser.
-                            </div>
-                            <div className="space-x-2">
-                                <Button
-                                    // @ts-expect-error: Only available in development mode.
-                                    onClick={() => chrome.runtime.openPopup()}
-                                >
-                                    Open popup
-                                </Button>
-                                <Button
-                                    onClick={() =>
-                                        // @ts-expect-error: Only available in development mode.
-                                        chrome.runtime.openEditPopup(
-                                            defaultRemovals[0].id
-                                        )
-                                    }
-                                >
-                                    Open edit pop
-                                </Button>
-                            </div>
-                        </div>
-                    )}
-
-                    {!isDialogOpen && (
-                        <Tabs defaultValue="user-removals">
-                            <TabsList className="w-full">
-                                <TabsTrigger value="user-removals">
-                                    Your Removals
-                                </TabsTrigger>
-                                <TabsTrigger value="default-removals">
-                                    Default Removals
-                                </TabsTrigger>
-                            </TabsList>
-                            <TabsContent value="user-removals">
-                                <RemovalList
-                                    removals={removals}
-                                    actions={{
-                                        toggle: toggleRemoval,
-                                        edit: editRemoval,
-                                        delete: deleteRemoval
-                                    }}
-                                />
-                            </TabsContent>
-                            <TabsContent value="default-removals">
-                                <RemovalList
-                                    removals={defaultRemovals}
-                                    actions={{
-                                        toggle: toggleDefaultRemoval
-                                    }}
-                                />
-                            </TabsContent>
-                        </Tabs>
-                    )}
-
-                    {/* Edit Removal Dialog */}
-                    {isDialogOpen && editingRemoval && (
-                        <EditRemovalForm
-                            initialRemoval={editingRemoval}
-                            onSave={saveRemoval}
-                            onCancel={() => setIsDialogOpen(false)}
-                        />
-                    )}
+        <div className="p-4 pt-0 min-h-[440px] min-w-[600px]">
+            {__DEV__ && (
+                <div className="p-4 mb-2 bg-amber-100 text-amber-800 rounded space-y-2">
+                    <div className="font-bold">Development Mode</div>
+                    <div className="text-sm">
+                        You are currently in development mode. This mode allows
+                        you to test the extension without affecting the browser.
+                    </div>
+                    <div className="space-x-2">
+                        <Button
+                            // @ts-expect-error: Only available in development mode.
+                            onClick={() => chrome.runtime.openPopup()}
+                        >
+                            Open popup
+                        </Button>
+                        <Button
+                            onClick={() =>
+                                // @ts-expect-error: Only available in development mode.
+                                chrome.runtime.openEditPopup(
+                                    defaultRemovals[0].id
+                                )
+                            }
+                        >
+                            Open edit pop
+                        </Button>
+                    </div>
                 </div>
-            </div>
-        </TooltipProvider>
+            )}
+
+            {!isDialogOpen && (
+                <Tabs defaultValue="user-removals">
+                    <TabsList className="w-full">
+                        <TabsTrigger value="user-removals">
+                            Your Removals
+                        </TabsTrigger>
+                        <TabsTrigger value="default-removals">
+                            Default Removals
+                        </TabsTrigger>
+                    </TabsList>
+                    <TabsContent value="user-removals">
+                        <RemovalList
+                            removals={removals}
+                            actions={{
+                                toggle: toggleRemoval,
+                                edit: editRemoval,
+                                delete: deleteRemoval
+                            }}
+                        />
+                    </TabsContent>
+                    <TabsContent value="default-removals">
+                        <RemovalList
+                            removals={defaultRemovals}
+                            actions={{
+                                toggle: toggleDefaultRemoval
+                            }}
+                        />
+                    </TabsContent>
+                </Tabs>
+            )}
+
+            {/* Edit Removal Dialog */}
+            {isDialogOpen && editingRemoval && (
+                <EditRemovalForm
+                    initialRemoval={editingRemoval}
+                    onSave={saveRemoval}
+                    onCancel={() => setIsDialogOpen(false)}
+                />
+            )}
+        </div>
     )
 }
 

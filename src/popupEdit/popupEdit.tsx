@@ -5,7 +5,6 @@ import { Progress } from "@/components/ui/progress"
 import { ModalRemoval, RemovalsManager, defaultRemovals } from "../config"
 
 import EditRemovalForm from "../components/EditRemovalForm"
-import { EXTENSION_ID } from "@/constants"
 
 const MAX_LOADING_TIME = 2000
 
@@ -44,45 +43,42 @@ function RemovalPopup() {
     }, [])
 
     return (
-        <div id={EXTENSION_ID}>
-            <div className="p-4">
-                {progress < 100 && !removal && <Progress value={progress} />}
-                {progress >= 100 && !removal && (
-                    <div>
-                        <h1 className="text-xl font-bold mb-4">
-                            Removal Not Found
-                        </h1>
-                        <p>
-                            The removal you are looking for does not exist.
-                            Please try again.
-                        </p>
-                    </div>
-                )}
+        <div className="p-4 min-h-screen">
+            {progress < 100 && !removal && <Progress value={progress} />}
+            {progress >= 100 && !removal && (
+                <div>
+                    <h1 className="text-xl font-bold mb-4">
+                        Removal Not Found
+                    </h1>
+                    <p>
+                        The removal you are looking for does not exist. Please
+                        try again.
+                    </p>
+                </div>
+            )}
 
-                {removal && (
-                    <>
-                        <h1 className="text-xl font-bold mb-4">Edit Removal</h1>
-                        <EditRemovalForm
-                            initialRemoval={removal}
-                            onSave={async (updatedRemoval) => {
-                                await RemovalsManager.updateRemoval(
-                                    removal.id,
-                                    updatedRemoval
-                                )
-                                window.close()
-                            }}
-                            onCancel={() => {
-                                window.close()
+            {removal && (
+                <>
+                    <h1 className="text-xl font-bold mb-4">Edit Removal</h1>
+                    <EditRemovalForm
+                        initialRemoval={removal}
+                        onSave={async (updatedRemoval) => {
+                            await RemovalsManager.updateRemoval(
+                                removal.id,
+                                updatedRemoval
+                            )
+                            window.close()
+                        }}
+                        onCancel={() => {
+                            window.close()
 
-                                if (__DEV__) {
-                                    window.location.href =
-                                        "/src/popup/index.html"
-                                }
-                            }}
-                        />
-                    </>
-                )}
-            </div>
+                            if (__DEV__) {
+                                window.location.href = "/src/popup/index.html"
+                            }
+                        }}
+                    />
+                </>
+            )}
         </div>
     )
 }

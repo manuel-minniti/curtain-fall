@@ -72,7 +72,7 @@ function EditRemovalForm({
     }
 
     return (
-        <div>
+        <div className="py-4">
             {/* Title */}
             <div className="mb-4">
                 <label className="block text-sm font-medium mb-1">Title</label>

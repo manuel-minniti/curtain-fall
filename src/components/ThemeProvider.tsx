@@ -1,7 +1,6 @@
-import { EXTENSION_ID } from "@/constants"
 import React, { createContext, useContext, useEffect, useState } from "react"
 
-type Theme = "dark" | "light" | "system"
+export type Theme = "dark" | "light" | "system"
 
 type ThemeProviderProps = {
     children: React.ReactNode
@@ -21,31 +20,24 @@ const initialState: ThemeProviderState = {
 
 const ThemeProviderContext = createContext<ThemeProviderState>(initialState)
 
+export function prefersDarkMode(): boolean {
+    return window.matchMedia("(prefers-color-scheme: dark)").matches
+}
+
 export function ThemeProvider({
     children,
-    defaultTheme = "system",
+    defaultTheme = __DEV__ ? "dark" : "system",
     storageKey = "vite-ui-theme",
     ...props
 }: ThemeProviderProps) {
     const [theme, setTheme] = useState<Theme>(defaultTheme)
 
     useEffect(() => {
-        function applySystemTheme() {
-            const prefersDark = window.matchMedia(
-                "(prefers-color-scheme: dark)"
-            ).matches
-            setTheme(prefersDark ? "dark" : "light")
-        }
-
         chrome.storage.local.get(storageKey, (result) => {
             if (result[storageKey]) {
-                if (result[storageKey] === "system") {
-                    applySystemTheme()
-                } else {
-                    setTheme(result[storageKey])
-                }
+                setTheme(result[storageKey])
             } else {
-                applySystemTheme()
+                setTheme("system")
             }
         })
     }, [])
@@ -58,10 +50,14 @@ export function ThemeProvider({
         }
     }
 
+    const isSystemDark = prefersDarkMode()
+    const themeClass =
+        theme === "system" ? (isSystemDark ? "dark" : "light") : theme
+
     return (
         <ThemeProviderContext.Provider {...props} value={value}>
-            <div id={EXTENSION_ID} className={theme}>
-                <div className="bg-background text-foreground">{children}</div>
+            <div id={__EXTENSION_ID__} className={themeClass}>
+                {children}
             </div>
         </ThemeProviderContext.Provider>
     )

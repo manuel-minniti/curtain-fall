@@ -1,7 +1,6 @@
 // General
 export const EXTENSION_NAME = "Curtain Fall"
-export const EXTENSION_ID = "curtain-fall"
-export const EXTENSION_SHADOW_ROOT_ID = EXTENSION_ID + "-shadow-root"
+export const EXTENSION_SHADOW_ROOT_ID = __EXTENSION_ID__ + "-shadow-root"
 
 // Chrome actions
 export const ACTION_START_SELECTING = "startSelecting"
