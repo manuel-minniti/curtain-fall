@@ -1,5 +1,8 @@
-import { RemovalsManager } from "../config"
-import type { ModalRemoval } from "../config"
+import { RemovalsManager } from "../state/removal"
+import type { ModalRemoval } from "../state/removal"
+
+import { BlockingListManager } from "@/state/blockingList"
+import type { BlockingRule } from "@/state/blockingList"
 
 if (__DEV__) {
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -9,6 +12,7 @@ if (__DEV__) {
 }
 
 let removals: ModalRemoval[] = []
+let blockingRules: BlockingRule[] = []
 
 async function init() {
     const extensionEnabled = await RemovalsManager.getExtensionEnabled()
@@ -17,23 +21,33 @@ async function init() {
     if (!isEnabled) return
 
     removals = await RemovalsManager.getAllRemovals()
-    if (removals.length === 0) return
+    blockingRules = await BlockingListManager.getEnabledBlockingListsRules()
 
-    // Initial processing of the current DOM
     processRemovals(removals, document)
+    applyBlockingRules(blockingRules, document)
 
-    // Set up MutationObserver to watch for changes in the DOM
-    const observer = new MutationObserver(() => {
+    const observer = new MutationObserver((/* mutationsList */) => {
         processRemovals(removals, document)
+
+        // for (const mutation of mutationsList) {
+        //     if (
+        //         mutation.type === "childList" &&
+        //         mutation.addedNodes.length > 0
+        //     ) {
+        //         mutation.addedNodes.forEach((node) => {
+        //             if (node.nodeType === Node.ELEMENT_NODE) {
+        applyBlockingRules(blockingRules, document)
+        //             }
+        //         })
+        //     }
+        // }
     })
 
-    // Start observing the document for changes
     observer.observe(document.documentElement, {
         childList: true,
         subtree: true
     })
 
-    // Listen for changes in the local storage.
     chrome.storage.onChanged.addListener((changes, areaName) => {
         if (areaName === "local") {
             if (
@@ -41,6 +55,10 @@ async function init() {
                 RemovalsManager.enabledDefaultRemovalsKey in changes
             ) {
                 updateRemovals()
+            }
+
+            if (BlockingListManager.blockingListsKey in changes) {
+                updateBlockingRules()
             }
 
             if (RemovalsManager.extensionEnabledKey in changes) {
@@ -61,7 +79,6 @@ async function init() {
 
 async function updateRemovals() {
     removals = await RemovalsManager.getAllRemovals()
-    // Re-process the entire document to apply new removals
     processRemovals(removals, document)
 }
 
@@ -69,6 +86,8 @@ function processRemovals(
     removals: ModalRemoval[],
     rootNode: HTMLElement | Document
 ) {
+    if (removals.length === 0) return
+
     removals.forEach((removal) => {
         if (removal.enabled === false) return
 
@@ -92,12 +111,46 @@ function processRemovals(
                 Object.keys(styles).forEach((styleProp) => {
                     ;(el as HTMLElement).style.setProperty(
                         styleProp,
-                        styles[styleProp]
+                        (styles as Record<string, string>)[styleProp]
                     )
                 })
             })
         })
     })
+}
+
+async function updateBlockingRules() {
+    const blockingRules =
+        await BlockingListManager.getEnabledBlockingListsRules()
+
+    applyBlockingRules(blockingRules, document)
+}
+
+function applyBlockingRules(
+    rules: BlockingRule[],
+    rootNode: HTMLElement | Document
+) {
+    if (rules.length === 0) return
+
+    const currentDomain = window.location.hostname
+    for (const rule of rules) {
+        if (
+            rule.exclusions.includes(currentDomain) ||
+            rule.type !== "element"
+        ) {
+            continue
+        }
+
+        try {
+            console.log("Apply rule:", rule.pattern)
+            rootNode.querySelectorAll(rule.pattern).forEach((el) => {
+                console.log("Remove element:", rule.pattern)
+                el.remove()
+            })
+        } catch (error) {
+            console.error("Invalid selector:", rule.pattern, error)
+        }
+    }
 }
 
 init()

@@ -7,7 +7,7 @@ import {
     SelectValue
 } from "@/components/ui/select"
 import { Theme, useTheme } from "@/components/ThemeProvider"
-import { getExtensionRoot } from "@/lib/utils"
+import { getExtensionRoot } from "@/lib/createRootApp"
 
 export function ThemeSwitcher() {
     const [extensionRoot, setExtensionRoot] =

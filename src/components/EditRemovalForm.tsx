@@ -1,6 +1,6 @@
 import React, { useState } from "react"
 
-import { ModalRemoval } from "../config"
+import { ModalRemoval } from "../state/removal"
 
 import { Input } from "@/components/ui/input"
 import { Textarea } from "@/components/ui/textarea"
@@ -14,12 +14,15 @@ import {
 import { ChevronDownIcon } from "@radix-ui/react-icons"
 
 import { getErrorMessage, reportError } from "@/lib/error"
+import { ClassRemoval, RemovalItem } from "@/types"
 
 interface EditRemovalFormProps {
     initialRemoval: ModalRemoval
     onSave: (removal: ModalRemoval) => void
     onCancel?: () => void
 }
+
+type RemovalUpdate = Partial<ModalRemoval>
 
 const SmallButton = (props: ButtonProps) => (
     <Button size="sm" {...props}>
@@ -35,7 +38,7 @@ function EditRemovalForm({
     const [removal, setRemoval] = useState<ModalRemoval>({ ...initialRemoval })
 
     // Handle changes to the removal properties
-    const handleChange = (field: keyof ModalRemoval, value: any) => {
+    const handleChange = (field: keyof ModalRemoval, value: string) => {
         setRemoval((prev) => ({ ...prev, [field]: value }))
     }
 
@@ -43,25 +46,31 @@ function EditRemovalForm({
     const handleArrayChange = (
         arrayName: keyof ModalRemoval,
         index: number,
-        value: any
+        value: RemovalItem | string
     ) => {
         setRemoval((prev) => {
-            const updatedArray = [...(prev[arrayName] as any[])]
-            updatedArray[index] = value
+            const updatedArray = [...(prev[arrayName] as RemovalUpdate[])]
+            updatedArray[index] = value as RemovalUpdate
             return { ...prev, [arrayName]: updatedArray }
         })
     }
 
-    const addArrayItem = (arrayName: keyof ModalRemoval, newItem: any) => {
+    const addArrayItem = (
+        arrayName: keyof ModalRemoval,
+        newItem: RemovalItem
+    ) => {
         setRemoval((prev) => {
-            const updatedArray = [...(prev[arrayName] as any[]), newItem]
+            const updatedArray = [
+                ...(prev[arrayName] as RemovalUpdate[]),
+                newItem
+            ]
             return { ...prev, [arrayName]: updatedArray }
         })
     }
 
     const removeArrayItem = (arrayName: keyof ModalRemoval, index: number) => {
         setRemoval((prev) => {
-            const updatedArray = [...(prev[arrayName] as any[])]
+            const updatedArray = [...(prev[arrayName] as RemovalUpdate[])]
             updatedArray.splice(index, 1)
             return { ...prev, [arrayName]: updatedArray }
         })
@@ -122,7 +131,7 @@ function EditRemovalForm({
                                 className="flex items-center space-x-2 mb-2"
                             >
                                 <Input
-                                    value={selector}
+                                    value={selector as string}
                                     onChange={(e) =>
                                         handleArrayChange(
                                             "elementSelectors",
@@ -157,50 +166,56 @@ function EditRemovalForm({
                         <label className="block text-sm font-medium mb-1">
                             Class Removals
                         </label>
-                        {removal.classRemoval.map((item, index) => (
-                            <div key={index} className="mb-2">
-                                <label className="block text-sm">
-                                    Element Selector
-                                </label>
-                                <Input
-                                    value={item.elementSelector}
-                                    onChange={(e) =>
-                                        handleArrayChange(
-                                            "classRemoval",
-                                            index,
-                                            {
-                                                ...item,
-                                                elementSelector: e.target.value
-                                            }
-                                        )
-                                    }
-                                />
-                                <label className="block text-sm mt-1">
-                                    Class Name
-                                </label>
-                                <Input
-                                    value={item.className || ""}
-                                    onChange={(e) =>
-                                        handleArrayChange(
-                                            "classRemoval",
-                                            index,
-                                            {
-                                                ...item,
-                                                className: e.target.value
-                                            }
-                                        )
-                                    }
-                                />
-                                <SmallButton
-                                    variant="destructive"
-                                    onClick={() =>
-                                        removeArrayItem("classRemoval", index)
-                                    }
-                                >
-                                    Remove
-                                </SmallButton>
-                            </div>
-                        ))}
+                        {removal.classRemoval.map(
+                            (item: ClassRemoval, index) => (
+                                <div key={index} className="mb-2">
+                                    <label className="block text-sm">
+                                        Element Selector
+                                    </label>
+                                    <Input
+                                        value={item.elementSelector}
+                                        onChange={(e) =>
+                                            handleArrayChange(
+                                                "classRemoval",
+                                                index,
+                                                {
+                                                    ...item,
+                                                    elementSelector:
+                                                        e.target.value
+                                                }
+                                            )
+                                        }
+                                    />
+                                    <label className="block text-sm mt-1">
+                                        Class Name
+                                    </label>
+                                    <Input
+                                        value={item.className || ""}
+                                        onChange={(e) =>
+                                            handleArrayChange(
+                                                "classRemoval",
+                                                index,
+                                                {
+                                                    ...item,
+                                                    className: e.target.value
+                                                }
+                                            )
+                                        }
+                                    />
+                                    <SmallButton
+                                        variant="destructive"
+                                        onClick={() =>
+                                            removeArrayItem(
+                                                "classRemoval",
+                                                index
+                                            )
+                                        }
+                                    >
+                                        Remove
+                                    </SmallButton>
+                                </div>
+                            )
+                        )}
                         <SmallButton
                             variant="secondary"
                             onClick={() =>

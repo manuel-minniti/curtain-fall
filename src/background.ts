@@ -1,30 +1,20 @@
-import { RemovalsManager, type ModalRemoval } from "./config"
+import { RemovalsManager, type ModalRemoval } from "./state/removal"
 import { v4 as uuid } from "uuid"
 
-import iconDataUrl from "./assets/icons/icon-48.png"
-
 import {
+    ACTION_APPLY_BLOCKING_RULES,
+    ACTION_REMOVE_BLOCKING_RULES,
     ACTION_ELEMENT_SELETED,
+    ACTION_FETCH_BLOCKING_LIST,
     ACTION_OPEN_EDIT_POPUP,
     ACTION_OPEN_OPTIONS,
-    EXTENSION_NAME
+    ACTION_UPDATE_BLOCKING_LISTS,
+    UPDATE_BLOCKING_LISTS_PERIOD_IN_MINS
 } from "./constants"
 
-const notificationId = "curtainFallNotification"
-
-function notifyUser(message: string) {
-    chrome.notifications.create(notificationId, {
-        type: "basic",
-        iconUrl: iconDataUrl,
-        title: EXTENSION_NAME,
-        message
-    })
-}
-
-function handleNotificationAction() {
-    chrome.runtime.openOptionsPage()
-    chrome.notifications.clear(notificationId)
-}
+import { parseBlockingList } from "./lib/blockingListParser"
+import { generateDNRRules } from "./lib/rulesGenerator"
+import { BlockingListManager } from "./state/blockingList"
 
 function openEditPopup(id: string) {
     chrome.system.display.getInfo((displayInfo) => {
@@ -74,26 +64,49 @@ async function getRemovalName(): Promise<string> {
     })
 }
 
-chrome.notifications.onButtonClicked.addListener(
-    (notificationId, buttonIndex) => {
-        if (notificationId === notificationId && buttonIndex === 0) {
-            handleNotificationAction()
+async function updateAllBlockingLists() {
+    const blockingLists = await BlockingListManager.getBlockingLists()
+    for (let i = 0; i < blockingLists.length; i++) {
+        const list = blockingLists[i]
+        if (list.enabled) {
+            try {
+                const response = await fetch(list.url)
+                const text = await response.text()
+                const rules = parseBlockingList(text)
+                list.rules = rules
+            } catch (error) {
+                console.error(
+                    `Error updating blocking list ${list.name}:`,
+                    error
+                )
+            }
         }
     }
-)
 
-chrome.notifications.onClicked.addListener((notificationId) => {
-    if (notificationId === notificationId) {
-        handleNotificationAction()
-    }
-})
+    BlockingListManager.setBlockingLists(blockingLists)
+}
 
 chrome.runtime.onInstalled.addListener(() => {
     chrome.contextMenus.create({
         id: ACTION_OPEN_OPTIONS,
-        title: `Open ${EXTENSION_NAME} Options`,
+        title: `Open ${__EXTENSION_NAME__} Options`,
         contexts: ["action"]
     })
+
+    chrome.alarms.create(ACTION_UPDATE_BLOCKING_LISTS, {
+        periodInMinutes: UPDATE_BLOCKING_LISTS_PERIOD_IN_MINS
+    })
+
+    chrome.declarativeNetRequest.updateDynamicRules({
+        removeRuleIds: [],
+        addRules: []
+    })
+})
+
+chrome.alarms.onAlarm.addListener((alarm) => {
+    if (alarm.name === ACTION_UPDATE_BLOCKING_LISTS) {
+        updateAllBlockingLists()
+    }
 })
 
 chrome.contextMenus.onClicked.addListener((info, tab) => {
@@ -109,18 +122,10 @@ chrome.contextMenus.onClicked.addListener((info, tab) => {
 })
 
 // Listeners
-chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
-    if (request.action === ACTION_OPEN_EDIT_POPUP) {
-        openEditPopup(request.id)
-        sendResponse({ status: "Opened" })
-    }
-})
-
 chrome.runtime.onMessage.addListener(async (request, sender, sendResponse) => {
     if (request.action === ACTION_ELEMENT_SELETED) {
         const { selector, screenshot } = request.data
 
-        // Current date in short format
         const currentDate = new Date().toLocaleDateString("en-US", {
             month: "short",
             day: "numeric",
@@ -129,9 +134,7 @@ chrome.runtime.onMessage.addListener(async (request, sender, sendResponse) => {
             minute: "numeric"
         })
 
-        // Get the current TLD as the name.
         const name = await getRemovalName()
-
         const newRemoval: ModalRemoval = {
             id: uuid(),
             name,
@@ -146,10 +149,93 @@ chrome.runtime.onMessage.addListener(async (request, sender, sendResponse) => {
 
         // Save the selector and screenshot to storage
         RemovalsManager.addRemoval(newRemoval).then(() => {
-            notifyUser(`New removal '${name}' created successfully.`)
             openEditPopup(newRemoval.id)
         })
 
         sendResponse({ status: "Element selected" })
+    }
+})
+
+chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
+    if (request.action === ACTION_OPEN_EDIT_POPUP) {
+        openEditPopup(request.id)
+        sendResponse({ status: "Opened" })
+
+        return true
+    }
+
+    if (request.action === ACTION_FETCH_BLOCKING_LIST) {
+        fetch(request.url)
+            .then((response) => response.text())
+            .then((text) => {
+                const rules = parseBlockingList(text)
+                sendResponse({ success: true, rules })
+            })
+            .catch((error) => {
+                console.error("Error fetching blocking list:", error)
+                sendResponse({ success: false, error: error.message })
+            })
+
+        return true
+    }
+
+    if (request.action === ACTION_APPLY_BLOCKING_RULES) {
+        const { rules } = request
+        const dnrRules = generateDNRRules(rules)
+
+        chrome.declarativeNetRequest.updateDynamicRules(
+            {
+                removeRuleIds: dnrRules.map((rule) => rule.id),
+                addRules: dnrRules
+            },
+            () => {
+                if (chrome.runtime.lastError) {
+                    console.error(
+                        "Error updating dynamic rules:",
+                        chrome.runtime.lastError
+                    )
+                    sendResponse({
+                        success: false,
+                        error: chrome.runtime.lastError.message
+                    })
+                } else {
+                    console.log("Blocking rules applied successfully.")
+                    sendResponse({
+                        success: true,
+                        ruleIds: dnrRules.map((rule) => rule.id)
+                    })
+                }
+            }
+        )
+
+        return true
+    }
+
+    if (request.action === ACTION_REMOVE_BLOCKING_RULES) {
+        const { ruleIds } = request
+
+        chrome.declarativeNetRequest.updateDynamicRules(
+            {
+                removeRuleIds: ruleIds,
+                addRules: []
+            },
+            () => {
+                if (chrome.runtime.lastError) {
+                    console.error(
+                        "Error removing dynamic rules:",
+                        chrome.runtime.lastError
+                    )
+                    sendResponse({
+                        success: false,
+                        error: chrome.runtime.lastError.message
+                    })
+                } else {
+                    console.log("Blocking rules removed successfully.")
+                    sendResponse({ success: true })
+                }
+            }
+        )
+
+        return true
     }
 })

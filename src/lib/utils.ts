@@ -37,9 +37,3 @@ export function createShadowRoot(styles: string) {
     // Return a React root created inside the shadow root
     return createRoot(shadow)
 }
-
-export function getExtensionRoot() {
-    return document
-        .getElementById(EXTENSION_SHADOW_ROOT_ID)
-        ?.shadowRoot?.getElementById(__EXTENSION_ID__)
-}

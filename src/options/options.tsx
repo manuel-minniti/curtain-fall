@@ -1,125 +1,25 @@
-import React, { useState, useEffect } from "react"
+import React from "react"
 
 import { Button } from "@/components/ui/button"
-import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs"
 
-import RemovalItem from "./RemovalItem"
+import BlockingLists from "./BlockingLists"
+import Removals from "./Removals"
 
-import { RemovalsManager } from "../config"
-import type { ModalRemoval } from "../config"
-import EditRemovalForm from "../components/EditRemovalForm"
+import { defaultRemovals } from "@/state/removal"
+import Navigation, { useNavigation } from "@/components/Navigation"
 
-import type { RemovalActions } from "../types"
-import { useToast } from "@/hooks/use-toast"
-
-const EmptyRemovalList = () => {
-    return (
-        <div className="p-4">
-            <div className="text-center text-sm text-muted-foreground">
-                No removals added yet.
-            </div>
-        </div>
-    )
-}
-
-export const RemovalList = ({
-    className = "",
-    actions,
-    removals
-}: {
-    className?: string
-    actions: RemovalActions
-    removals: ModalRemoval[]
-}) => {
-    if (removals.length === 0) {
-        return <EmptyRemovalList />
-    }
-
-    return (
-        <div className={`grid grid-cols-2 gap-2 ${className}`}>
-            {removals.length > 0 &&
-                removals.map((removal, idx) => (
-                    <RemovalItem
-                        key={idx}
-                        removal={removal}
-                        id={removal.id}
-                        actions={actions}
-                    />
-                ))}
-        </div>
-    )
-}
+const NavigationItems = ["Removals", "Blocking Lists"]
 
 function Options() {
-    const { toast } = useToast()
+    const { setSelectedItem, ...navigationProps } = useNavigation({
+        initialItem: NavigationItems[0],
+        items: NavigationItems
+    })
 
-    const [removals, setRemovals] = useState<ModalRemoval[]>([])
-    const [defaultRemovals, setDefaultRemovals] = useState<ModalRemoval[]>([])
-
-    const [editingRemoval, setEditingRemoval] = useState<ModalRemoval | null>(
-        null
-    )
-    const [isDialogOpen, setIsDialogOpen] = useState<boolean>(false)
-
-    useEffect(() => {
-        loadRemovals()
-        loadDefaultRemovals()
-    }, [])
-
-    const loadRemovals = async () => {
-        const userRemovals = await RemovalsManager.getRemovals()
-        setRemovals(userRemovals)
-    }
-
-    const loadDefaultRemovals = async () => {
-        const defaultRemovals = await RemovalsManager.getDefaultRemovals()
-        setDefaultRemovals(defaultRemovals)
-    }
-
-    const deleteRemoval = async (id: string) => {
-        const index = RemovalsManager.findIndexById(removals, id)
-        const removal = removals[index]
-        if (removal.isDefault) {
-            toast({ description: "Default removals cannot be deleted." })
-            return
-        }
-
-        await RemovalsManager.deleteRemoval(id)
-        await loadRemovals()
-        toast({ description: "Removal deleted successfully." })
-        setIsDialogOpen(false)
-    }
-
-    const toggleRemoval = async (id: string, enabled: boolean) => {
-        const index = RemovalsManager.findIndexById(removals, id)
-        const removal = removals[index]
-        removal.enabled = enabled
-        await RemovalsManager.updateRemoval(id, removal)
-        await loadRemovals()
-    }
-
-    const toggleDefaultRemoval = async (id: string, enabled: boolean) => {
-        await RemovalsManager.toggleDefaultRemoval(id, enabled)
-        loadDefaultRemovals()
-    }
-
-    const editRemoval = (id: string) => {
-        const index = RemovalsManager.findIndexById(removals, id)
-        const removal = removals[index]
-        setEditingRemoval(removal)
-        setIsDialogOpen(true)
-    }
-
-    const saveRemoval = async (updatedRemoval: ModalRemoval) => {
-        await RemovalsManager.updateRemoval(updatedRemoval.id, updatedRemoval)
-        await loadRemovals()
-        toast({ description: "Removal updated successfully." })
-        setIsDialogOpen(false)
-        loadRemovals()
-    }
+    const menuItem = navigationProps.selectedItem
 
     return (
-        <div className="p-4 pt-0 min-h-[440px] min-w-[600px]">
+        <div className="p-4 min-h-[440px] min-w-[600px]">
             {__DEV__ && (
                 <div className="p-4 mb-2 bg-amber-100 text-amber-800 rounded space-y-2">
                     <div className="font-bold">Development Mode</div>
@@ -148,45 +48,12 @@ function Options() {
                 </div>
             )}
 
-            {!isDialogOpen && (
-                <Tabs defaultValue="user-removals">
-                    <TabsList className="w-full">
-                        <TabsTrigger value="user-removals">
-                            Your Removals
-                        </TabsTrigger>
-                        <TabsTrigger value="default-removals">
-                            Default Removals
-                        </TabsTrigger>
-                    </TabsList>
-                    <TabsContent value="user-removals">
-                        <RemovalList
-                            removals={removals}
-                            actions={{
-                                toggle: toggleRemoval,
-                                edit: editRemoval,
-                                delete: deleteRemoval
-                            }}
-                        />
-                    </TabsContent>
-                    <TabsContent value="default-removals">
-                        <RemovalList
-                            removals={defaultRemovals}
-                            actions={{
-                                toggle: toggleDefaultRemoval
-                            }}
-                        />
-                    </TabsContent>
-                </Tabs>
-            )}
+            <div className="mb-2">
+                <Navigation {...navigationProps} onSelect={setSelectedItem} />
+            </div>
 
-            {/* Edit Removal Dialog */}
-            {isDialogOpen && editingRemoval && (
-                <EditRemovalForm
-                    initialRemoval={editingRemoval}
-                    onSave={saveRemoval}
-                    onCancel={() => setIsDialogOpen(false)}
-                />
-            )}
+            {menuItem === NavigationItems[0] && <Removals />}
+            {menuItem === NavigationItems[1] && <BlockingLists />}
         </div>
     )
 }

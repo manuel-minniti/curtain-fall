@@ -11,12 +11,8 @@ import { Button } from "@/components/ui/button"
 import { Separator } from "@/components/ui/separator"
 
 import ExtensionIcon from "@/assets/icons/icon-48.png"
-import { RemovalsManager } from "../config"
-import {
-    ACTION_START_SELECTING,
-    ACTION_STOP_SELECTING,
-    EXTENSION_NAME
-} from "@/constants"
+import { RemovalsManager } from "../state/removal"
+import { ACTION_START_SELECTING, ACTION_STOP_SELECTING } from "@/constants"
 
 import { ThemeSwitcher } from "@/components/ThemeSwitcher"
 
@@ -106,11 +102,11 @@ function Popup() {
                 <span className="flex items-center justify-between gap-2 mb-2">
                     <img
                         src={ExtensionIcon}
-                        alt={EXTENSION_NAME}
+                        alt={__EXTENSION_NAME__}
                         className="w-8 h-8"
                     />
                     <span className="text-lg font-bold block flex-1">
-                        {EXTENSION_NAME}
+                        {__EXTENSION_NAME__}
                     </span>
                     <ThemeSwitcher />
                 </span>

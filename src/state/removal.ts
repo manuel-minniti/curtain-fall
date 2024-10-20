@@ -1,9 +1,11 @@
+import { ClassRemoval, StyleReset } from "../types"
+
 export interface ModalRemoval {
     id: string
     name: string
     elementSelectors: string[]
-    classRemoval: { elementSelector: string; className: string }[]
-    styleReset: { elementSelector: string; styles: { [key: string]: string } }[]
+    classRemoval: ClassRemoval[]
+    styleReset: StyleReset[]
     description?: string
     screenshot?: string
     isDefault?: boolean
@@ -35,7 +37,6 @@ export const defaultRemovals: ModalRemoval[] = [
         ],
         styleReset: [{ elementSelector: "html", styles: { overflow: "" } }]
     }
-    // Add more default removals as needed
 ]
 
 export class RemovalsManager {

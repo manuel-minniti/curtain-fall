@@ -17,7 +17,8 @@ export default defineConfig(({ mode }) => ({
     },
     define: {
         __DEV__: mode === "development",
-        __EXTENSION_ID__: JSON.stringify("curtain-fall")
+        __EXTENSION_ID__: JSON.stringify("curtain-fall"),
+        __EXTENSION_NAME__: JSON.stringify("Curtain Fall")
     },
     resolve: {
         alias: {

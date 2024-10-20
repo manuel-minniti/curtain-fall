@@ -2,7 +2,11 @@ import React, { useEffect, useState } from "react"
 
 import { Progress } from "@/components/ui/progress"
 
-import { ModalRemoval, RemovalsManager, defaultRemovals } from "../config"
+import {
+    ModalRemoval,
+    RemovalsManager,
+    defaultRemovals
+} from "../state/removal"
 
 import EditRemovalForm from "../components/EditRemovalForm"
 

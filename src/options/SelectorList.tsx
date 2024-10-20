@@ -1,14 +1,14 @@
 import React from "react"
 import { Badge } from "@/components/ui/badge"
 
-import { SelectorItem } from "@/types"
+import { RemovalItem } from "@/types"
 
 const SelectorList = ({
     title,
     items
 }: {
     title: string
-    items: SelectorItem[]
+    items: RemovalItem[]
 }) => {
     return (
         <div className="mb-4">

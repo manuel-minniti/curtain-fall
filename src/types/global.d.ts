@@ -9,3 +9,4 @@ declare module "*.png" {
 
 declare const __DEV__: boolean
 declare const __EXTENSION_ID__: string
+declare const __EXTENSION_NAME__: string

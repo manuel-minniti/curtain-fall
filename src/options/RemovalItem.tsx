@@ -14,7 +14,7 @@ import { Switch } from "@/components/ui/switch"
 import Tooltip from "../components/Tooltip"
 import SelectorList from "./SelectorList"
 
-import { ModalRemoval } from "../config"
+import { ModalRemoval } from "../state/removal"
 import { RemovalActions } from "@/types"
 
 export const RemovalItem = ({

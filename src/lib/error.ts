@@ -1,8 +1,5 @@
 // Thanks to Kent C. Dodds
 // https://kentcdodds.com/blog/get-a-catch-block-error-message-with-typescript
-
-import { EXTENSION_NAME } from "@/constants"
-
 type ErrorWithMessage = {
     message: string
 }
@@ -31,7 +28,7 @@ function getErrorMessage(error: unknown) {
 }
 
 const reportError = ({ message }: { message: string }) => {
-    console.error(`[${EXTENSION_NAME} extension]: ${message}`)
+    console.error(`[${__EXTENSION_NAME__} extension]: ${message}`)
 }
 
 export {

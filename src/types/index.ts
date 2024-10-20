@@ -5,14 +5,15 @@ export type RemovalActions = {
 }
 
 // Selectors
-export type RemovalSelector = {
+export type ClassRemoval = {
     elementSelector: string
     className: string
 }
 
-export type ResetSelector = {
+export type StyleReset = {
     elementSelector: string
-    styles: { [key: string]: string }
+    styles: React.CSSProperties
 }
 
-export type SelectorItem = RemovalSelector | ResetSelector | string
+export type RemovalSelector = ClassRemoval | StyleReset
+export type RemovalItem = ClassRemoval | StyleReset | string

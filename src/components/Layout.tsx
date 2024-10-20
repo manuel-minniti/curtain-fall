@@ -8,7 +8,7 @@ export default function Layout({ children }: PropsWithChildren) {
         <ThemeProvider>
             <TooltipProvider delayDuration={0}>
                 <Toaster />
-                <div className="bg-background text-foreground">{children}</div>
+                <div className="bg-muted text-foreground">{children}</div>
             </TooltipProvider>
         </ThemeProvider>
     )
